@@ -72,7 +72,6 @@ function draw()
 	fill(237, 243, 245);
     ellipse(378, 70, 27, 20) // MOON highlight
     
-    
     // STARS/snow?
     
     strokeWeight(2)
@@ -97,8 +96,6 @@ function draw()
 
 	//2. a mountain in the distance
 	//... add your code here
-
-
 
 	//3. a tree
 	//... add your code here
@@ -141,8 +138,6 @@ function draw()
     
     line(930, 340, 955, 330) // ниже ниже справа2
     
-    
-
 	//4. a canyon
 	//NB. the canyon should go from ground-level to the bottom of the screen
 
