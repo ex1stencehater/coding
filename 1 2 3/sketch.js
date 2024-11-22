@@ -129,7 +129,7 @@ function draw()
     ellipse(x+13, y-10, 80-75, 80-65)
     rect(x-10, y+25, 80-60, 80-77)
     
-    if (keyIsDown(68)) {
+    if (keyIsDown(68)) { //right
         x = x + 7
         noStroke()
         fill(205, 207, 89)
@@ -141,7 +141,7 @@ function draw()
         rect(x+5, y+25, 80-65, 80-77)        
     }
     
-    if (keyIsDown(65)) {
+    if (keyIsDown(65)) { //left
         x = x - 7
         noStroke()
         fill(205, 207, 89)
@@ -153,7 +153,7 @@ function draw()
         rect(x-15, y+25, 80-65, 80-77)
     }
     
-    if (keyIsDown(32) && y > 350) {
+    if (keyIsDown(32) && y > 350) { //jump
         speed = 5
         y = y - speed 
     }
