@@ -1,7 +1,8 @@
-let x = 450
-let y = 400
-let isGrounded = true
-let floorY = 400
+/* let x = 450
+let y = 400 */
+let player
+//let isGrounded = true
+//let floorY = 400
 
 /*
 let knife = {
@@ -12,11 +13,78 @@ let knife = {
 };
  */
 
-let speed = 0
+// let speed = 0
 
 function setup()
 {
 	createCanvas(1024, 576);
+    player =
+    {
+        x: 450,
+        y: 400,
+        jump: false,
+        right: false,
+        left: false,
+        speed: 5,
+        movement: function()
+        {
+
+                if(this.jump && this.y > 350)
+                {
+                    this.speed = 5;
+                    this.y -= this.speed;
+                }
+                else if (this.y < 400)
+                {
+                    this.speed -= 0.6
+                    this.y -= this.speed;
+                }
+                if (this.right && this.x < 994)
+                    this.x += 7;
+                if (this.left && this.x > 30)
+                    this.x -= 7; 
+        },
+        
+        draw: function()
+        {
+        
+            noStroke() // bro
+            fill(205, 207, 89)
+            ellipse(this.x, this.y, 80, 80)
+            fill(240, 234, 228)
+            ellipse(this.x-13, this.y-10, 15, 30)
+            ellipse(this.x+13, this.y-10, 15, 30)
+            fill('black')
+            ellipse(this.x-13, this.y-10, 5, 15)
+            ellipse(this.x+13, this.y-10, 5, 15)
+            rect(this.x-10, this.y+25, 80-60, 3)
+            
+            if (this.right) { //right
+                this.x = this.x + 5
+                noStroke()
+                fill(205, 207, 89)
+                ellipse(this.x, this.y, 80, 80)
+                fill(240, 234, 228)
+                ellipse(this.x+18, this.y-10, 15, 30)
+                fill('black')
+                ellipse(this.x+18, this.y-10, 5, 15)
+                rect(this.x+5, this.y+25, 15, 3)        
+            }
+
+            if (this.left) { //left
+                this.x = this.x - 5
+                noStroke()
+                fill(205, 207, 89)
+                ellipse(this.x, this.y, 80, 80)
+                fill(240, 234, 228)
+                ellipse(this.x-18, this.y-10, 15, 30)
+                fill('black')
+                ellipse(this.x-18, this.y-10, 5, 15)
+                rect(this.x-15, this.y+25, 15, 3)
+            }
+
+        }
+    }
 }
 
 function draw()
@@ -121,9 +189,11 @@ function draw()
     
     quad(0, 432, 40, 432, 150, 576, 0, 576) // ice    
 
+    player.draw(); 
+    player.movement();
 //character
     
-    noStroke()
+ /*   noStroke()
     fill(205, 207, 89)
     ellipse(x, y, 80, 80)
     fill(240, 234, 228)
@@ -133,9 +203,10 @@ function draw()
     ellipse(x-13, y-10, 5, 15)
     ellipse(x+13, y-10, 5, 15)
     rect(x-10, y+25, 80-60, 3)
-
+*/
+}
     
-    if (keyIsDown(68)) { //right
+    /* if (keyIsDown(68)) { //right
         x = x + 7
         noStroke()
         fill(205, 207, 89)
@@ -170,5 +241,25 @@ function draw()
     }
     else if (y >= floorY)
         isGrounded = true;
-
+*/
+    function keyPressed()
+{  
+    if (keyCode == 32)
+        player.jump = true;
+    if (keyCode == 68)
+        player.right = true;
+    if (keyCode == 65)
+        player.left = true;
 }
+
+function keyReleased()
+{
+    if (keyCode == 32)
+        player.jump = false;
+    if (keyCode == 68)
+        player.right = false;
+    if (keyCode == 65)
+        player.left = false;
+    
+}
+
