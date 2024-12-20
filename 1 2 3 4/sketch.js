@@ -1,20 +1,4 @@
-/* let x = 450
-let y = 400 */
 let player
-//let isGrounded = true
-//let floorY = 400
-
-/*
-let knife = {
-	knifeX_begin: 380,
-	knifeY_begin: 422,
-    knifeX_end: 400,
-    knifeY_end: 432
-};
- */
-
-// let speed = 0
-
 function setup()
 {
 	createCanvas(1024, 576);
@@ -28,7 +12,6 @@ function setup()
         speed: 5,
         movement: function()
         {
-
                 if(this.jump && this.y > 350)
                 {
                     this.speed = 5;
@@ -191,57 +174,8 @@ function draw()
 
     player.draw(); 
     player.movement();
-//character
-    
- /*   noStroke()
-    fill(205, 207, 89)
-    ellipse(x, y, 80, 80)
-    fill(240, 234, 228)
-    ellipse(x-13, y-10, 15, 30)
-    ellipse(x+13, y-10, 15, 30)
-    fill('black')
-    ellipse(x-13, y-10, 5, 15)
-    ellipse(x+13, y-10, 5, 15)
-    rect(x-10, y+25, 80-60, 3)
-*/
 }
     
-    /* if (keyIsDown(68)) { //right
-        x = x + 7
-        noStroke()
-        fill(205, 207, 89)
-        ellipse(x, y, 80, 80)
-        fill(240, 234, 228)
-        ellipse(x+18, y-10, 15, 30)
-        fill('black')
-        ellipse(x+18, y-10, 5, 15)
-        rect(x+5, y+25, 15, 3)        
-    }
-
-    if (keyIsDown(65)) { //left
-        x = x - 7
-        noStroke()
-        fill(205, 207, 89)
-        ellipse(x, y, 80, 80)
-        fill(240, 234, 228)
-        ellipse(x-18, y-10, 15, 30)
-        fill('black')
-        ellipse(x-18, y-10, 5, 15)
-        rect(x-15, y+25, 15, 3)
-    }
-    
-    if (keyIsDown(32) && isGrounded) { //jump
-        speed = 10
-        y = y - speed
-        isGrounded = false
-    }
-    if (y < floorY) {
-        speed = speed - 0.5
-        y = y - speed 
-    }
-    else if (y >= floorY)
-        isGrounded = true;
-*/
     function keyPressed()
 {  
     if (keyCode == 32)
