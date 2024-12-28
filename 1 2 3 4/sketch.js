@@ -9,6 +9,8 @@ function setup()
         jump: false,
         right: false,
         left: false,
+        isGrounded: false,
+        isDead: false,
         speed: 5,
         movement: function()
         {
@@ -16,11 +18,13 @@ function setup()
                 {
                     this.speed = 5;
                     this.y -= this.speed;
+                    //this.isGrounded = false;
                 }
                 else if (this.y < 400)
                 {
                     this.speed -= 0.6
                     this.y -= this.speed;
+                    //this.isGrounded = true;
                 }
                 if (this.right && this.x < 994)
                     this.x += 7;
@@ -149,14 +153,17 @@ function draw()
     noStroke();
 	fill(154, 170, 173);
 	quad(0, 432, 310, 432, 420, 576, 0, 576) // sand
-         
+    
 	noStroke();
 	fill(31, 46, 61);
-	quad(0, 432, 290, 432, 400, 576, 0, 576) // LAKE
+	quad(0, 432, 290, 432, 400, 576, 0, 576); // LAKE
     
     noStroke();
 	fill(20, 31, 41, 150);
 	quad(0, 432, 270, 432, 380, 576, 0, 576) // shade прозрачность 
+    
+    fill(21, 36, 51);
+    quad(0, 432, 270, 432, 270, 576, 0, 576); // canyon
     
     strokeWeight(3);
     stroke(218, 225, 227)
@@ -167,10 +174,9 @@ function draw()
     line(150, 515, 270, 515)
     line(15, 545, 50, 545)
     
-    noStroke()
-    fill(154, 170, 173, 150)
-    
-    quad(0, 432, 40, 432, 150, 576, 0, 576) // ice    
+    //noStroke()
+    //fill(154, 170, 173, 150)
+    //quad(0, 432, 40, 432, 150, 576, 0, 576) // ice    
 
     player.draw(); 
     player.movement();
@@ -186,7 +192,7 @@ function draw()
         player.left = true;
 }
 
-function keyReleased()
+    function keyReleased()
 {
     if (keyCode == 32)
         player.jump = false;
