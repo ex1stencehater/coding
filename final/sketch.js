@@ -10,18 +10,18 @@ let highlights;
 let underwater;
 let score = 0;
 let enemy;
-//let music;
+var background_music = new Audio("background_music.mp3");
+var death_se = new Audio("death-se.mp3");
+var kill_se = new Audio("kill-se.wav");
 let countCanyons = 1;
 let canyons = [];
-
-/*function preload() {
-    music = loadSound("sounds/horror.mp3");
-}*/
 
 function setup()
 {
     createCanvas(1024, 576);
-    //music.play();
+    background_music.volume = 0.4;
+    death_se.volume = 0.45;
+    kill_se.volume = 0.45;
     player = 
     {
         x: 470,
@@ -113,6 +113,7 @@ function setup()
                     this.x = 400;
                     this.grounded = true;
                     this.dead = false;
+                    death_se.play();
                 }
             }
         },
@@ -121,12 +122,12 @@ function setup()
                 if (this.y + 10 <= enemy.y && this.y + 10 >= enemy.y - enemy.height / 2) 
                     {this.dead = true;
                     score -= 1;
-                    //sound.play();
+                    death_se.play();
                     }
                 if (this.y + 10 <= enemy.y - enemy.height / 2 && this.y + 10 >= enemy.y - enemy.height)
                    {enemy.dead = true;
                     score += 1;
-                   //sound.play();
+                    kill_se.play();
                    }
             }
 
@@ -429,6 +430,7 @@ function setup()
 function draw()
 {
     background(18, 36, 35);
+    background_music.play();
     sky.drawSky();
     moon.drawMoon();
     stars.drawStars();
