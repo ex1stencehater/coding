@@ -1,3 +1,4 @@
+/*
 let sound = new Audio("background_music.mp3")
 
 
@@ -12,13 +13,13 @@ function draw()
     background(0);
 }
 
+*/
 
 
 
 
-
-
-/*let sound;
+/*
+let sound;
 
 function preload(){
     sound = loadSound("background_music.mp3");
@@ -36,6 +37,27 @@ function draw()
 }
 
 */
+
+let mySound;
+// function for preloading assets 
+function preload() {
+  soundFormats('mp3', 'ogg'); // format sounds support
+  mySound = loadSound('background_music.mp3'); // connect sound from directory
+}
+
+function setup() {
+  let cnv = createCanvas(100, 100);
+  cnv.mousePressed(canvasPressed);
+  background(220);
+  text('tap here to play', 10, 20);
+}
+
+// function listen when user pressed in canvas
+function canvasPressed() {
+  // playing a sound file on a user gesture
+  // is equivalent to `userStartAudio()`
+  mySound.play();
+}
 
 /*let mySound;
 function onSoundLoadSuccess(e){
