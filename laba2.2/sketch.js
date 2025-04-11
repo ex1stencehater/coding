@@ -14,14 +14,20 @@ let background_music;
 let death_se;
 let backPlay;
 let kill_se;
+
 let countCanyons = 1;
 let canyons = [];
+let countPlatforms = 1;
+let platforms = [{ x: 540, y: 330, width: 100, height: 10 }];
+let onGrounded;
+let basefloor = 200;
+
 let soundSlider;
 let musicSlider;
 let musicSliderVisible = false;
 let soundSliderVisible = false;
 let restartButton;
-let gamePaused = false; // track if the game is paused
+let gamePaused = false;
 
 function preload() {
     soundFormats('mp3', 'wav', 'ogg');
@@ -34,8 +40,6 @@ function preload() {
 function setup()
 {
     createCanvas(1024, 576);
-    //showMusicSlider();
-    //cnv.mousePressed(canvasPressed);
     player = 
     {
         x: 470,
@@ -60,15 +64,35 @@ function setup()
             ellipse(this.x+13, this.y-10, this.width-75, this.height-65)
             rect(this.x-10, this.y+25, this.width-60, this.height-77)
         },
-        gravity: function(floor)
-        {
-            if (this.speedGravity > -5)
-                this.speedGravity--;
-            if (this.y + 40 < height - floor.height)
-                this.y -= this.speedGravity;
-            else 
-            {
-                this.grounded = true;
+        gravity: function (floor) {
+            let onPlatform = false;
+
+            // check if the player is on any platform
+            for (let i = 0; i < platforms.length; i++) {
+                let platform = platforms[i];
+                if (
+                    this.x + this.width / 2 > platform.x &&
+                    this.x - this.width / 2 < platform.x + platform.width &&
+                    this.y + this.height / 2 >= platform.y &&
+                    this.y + this.height / 2 <= platform.y + platform.height
+                ) {
+                    onPlatform = true;
+                    this.grounded = true;
+                    this.y = platform.y - this.height / 2; // align player on top of the platform
+                    break;
+                }
+            }
+        
+            // check for ground if not on a platform
+            if (!onPlatform) {
+                if (this.speedGravity > -5) this.speedGravity--;
+                if (this.y + this.height / 2 < height - floor.height) {
+                    this.y -= this.speedGravity;
+                    this.grounded = false;
+                } else {
+                    this.grounded = true;
+                    this.y = height - floor.height - this.height / 2; // align player on the ground
+                }
             }
         },
         jump: function()
@@ -128,7 +152,6 @@ function setup()
                     this.grounded = true;
                     this.dead = false;
                     death_se.play();
-                    showRestartButton();
                 }
             }
         },
@@ -138,6 +161,7 @@ function setup()
                     {this.dead = true;
                     score -= 1;
                     death_se.play();
+                    showRestartButton();
                     }
                 if (this.y + 10 <= enemy.y - enemy.height / 2 && this.y + 10 >= enemy.y - enemy.height)
                    {enemy.dead = true;
@@ -167,7 +191,9 @@ function setup()
                 {
                     this.grounded = false;   
                     this.dead = true;
-                    this.deadAnimation();   
+                    showRestartButton();
+                    death_se.play();
+                    //this.deadAnimation();   
                 }
             }
         }
@@ -445,6 +471,14 @@ function setup()
         kill_se.setVolume(0.3);
 };
 
+function drawPlatforms() {
+    for (let i = 0; i < platforms.length; i++) {
+        noStroke();
+        fill(100, 100, 100);
+        rect(platforms[i].x, platforms[i].y, platforms[i].width, platforms[i].height);
+    }
+}
+
 function keyPressed()
 {
     if (keyIsDown(77)) // 'M'
@@ -544,6 +578,14 @@ function restartGame() {
 
 function draw()
 {
+    if (gamePaused) {
+        // if the game is paused, draw the restart button only
+        fill(255);
+        textSize(20);
+        text("you are dead", width / 2 - 60, height / 2 - 50);
+        return;
+    }
+
     background(18, 36, 35);
     sky.drawSky();
     moon.drawMoon();
@@ -554,6 +596,7 @@ function draw()
     for(let i = 0; i < canyons.length; i++)
         canyons[i].drawCanyon();
     highlights.drawHighlights();
+    drawPlatforms();
     
     enemy.draw();
     enemy.movement();
