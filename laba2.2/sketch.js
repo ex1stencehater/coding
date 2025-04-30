@@ -3,13 +3,13 @@ let switcher;
 let sky;
 let moon;
 let stars;
-let tree;
+let countTrees = 4;
+let trees = []; // Array to hold multiple trees
 let floor;
-let pond;
-let highlights;
-let underwater;
+let pond = [];
+let highlights = [];
 let score = 0;
-let enemy;
+let enemy = [];
 let background_music;
 let death_se;
 let backPlay;
@@ -21,6 +21,7 @@ let countPlatforms = 1;
 let platforms = [{ x: 540, y: 330, width: 100, height: 10 }];
 let onGrounded;
 let basefloor = 200;
+let offsetMovingCamera = 200;
 
 let soundSlider;
 let musicSlider;
@@ -51,6 +52,7 @@ function setup()
         color2: color(240, 234, 228),
         grounded: false,
         dead: false,
+        speedRun: 5,
         drawPlayer: function()
         {
             noStroke() // bro
@@ -156,22 +158,40 @@ function setup()
             }
         },
         checkEnemy: function () {
-            if (this.x >= enemy.x && this.x <= enemy.x + enemy.width) {
-                if (this.y + 10 <= enemy.y && this.y + 10 >= enemy.y - enemy.height / 2) 
-                    {this.dead = true;
-                    score -= 1;
-                    death_se.play();
-                    showRestartButton();
+            for (let i = 0; i < enemy.length; i++) {
+                let currentEnemy = enemy[i];
+        
+                // Check if the player collides with the enemy
+                if (
+                    this.x + this.width / 2 > currentEnemy.x - currentEnemy.width / 2 &&
+                    this.x - this.width / 2 < currentEnemy.x + currentEnemy.width / 2 &&
+                    this.y + this.height / 2 > currentEnemy.y - currentEnemy.height / 2 &&
+                    this.y - this.height / 2 < currentEnemy.y + currentEnemy.height / 2
+                ) {
+                    if (this.y + this.height / 2 <= currentEnemy.y - currentEnemy.height / 4) {
+                        // Player jumps on the enemy
+                        currentEnemy.dead = true;
+                        score += 1;
+                        kill_se.play();
+                    } else {
+                        // Player collides with the enemy
+                        this.dead = true;
+                        score -= 1;
+                        death_se.play();
+                        showRestartButton();
                     }
-                if (this.y + 10 <= enemy.y - enemy.height / 2 && this.y + 10 >= enemy.y - enemy.height)
-                   {enemy.dead = true;
-                    score += 1;
-                    kill_se.play();
-                   }
+                }
+        
+                // Handle enemy death animation
+                if (currentEnemy.dead) {
+                    currentEnemy.deadAnimation();
+                }
             }
-
-            if (this.dead) this.deadAnimation();
-            if (enemy.dead) enemy.deadAnimation();
+        
+            // Handle player death animation
+            if (this.dead) {
+                this.deadAnimation();
+            }
         },
         checkOutside: function() {
             if (this.x < -10)
@@ -184,9 +204,9 @@ function setup()
             {
                 if
                 (
-                    this.y + this.height >= height - floor.height && 
+                    this.y + this.height - 30 >= height - floor.height && // 210 + 80 >= 80 - 140 (290 >= -60) 
                     this.x >= canyons[i].x && 
-                    this.x + this.width <= canyons[i].x + canyons[i].width
+                    this.x + this.width - 80 <= canyons[i].x + canyons[i].width
                 )
                 {
                     this.grounded = false;   
@@ -266,8 +286,7 @@ function setup()
         },
     }
         
-    tree =
-    {
+    trees.push({
         a: 0,
         b: 0,
         c: 0,
@@ -298,13 +317,161 @@ function setup()
             line(this.a+820, this.b+315, this.c+770, this.d+290) // ниже слева2
             line(this.a+820, this.b+315, this.c+785, this.d+320) // ниже слева22
             line(this.a+875, this.b+335, this.c+800, this.d+360) // ниже ниже слева
-            line(this.a+875, this.b+335, this.c+940,this.d+ 280) // справа ниже
+            line(this.a+875, this.b+335, this.c+940, this.d+280) // справа ниже
             line(this.a+940, this.b+280, this.c+960, this.d+250) // справа ниже2
             line(this.a+875, this.b+335, this.c+930, this.d+340) // ниже ниже справа
             line(this.a+930, this.b+340, this.c+955, this.d+330) // ниже ниже справа2
         },
-    }
-    
+    });
+
+    trees.push({
+        a: 0 + 400,
+        b: 0,
+        c: 0 + 400,
+        d: 0,
+        x1: 860 + 400,
+        y1: 462,
+        x2: 890 + 400,
+        y2: 462,
+        x3: 875 + 400,
+        y3: 320,
+        color: color(48, 47, 47),
+        drawTree: function () {
+            noStroke();
+            fill(this.color);
+            triangle(this.x1, this.y1, this.x2, this.y2, this.x3, this.y3);
+            strokeWeight(5); //ветки
+            stroke(48, 47, 47);
+            line(this.a+875, this.b+330, this.c+825, this.d+280) // main left
+            line(this.a+875, this.b+335, this.c+895, this.d+235) // main right
+            line(this.a+825, this.b+280, this.c+800, this.d+220) // l2
+            line(this.a+800, this.b+220, this.c+780, this.d+200) // l3
+            line(this.a+895, this.b+235, this.c+915, this.d+200) // r2
+            line(this.a+875, this.b+330, this.c+850, this.d+190) // middle1
+            line(this.a+850, this.b+190, this.c+860, this.d+130) // m2
+            line(this.a+875, this.b+335, this.c+840, this.d+250) // ml
+            line(this.a+875, this.b+335, this.c+820, this.d+315) // ниже слева1
+            line(this.a+820, this.b+315, this.c+770, this.d+290) // ниже слева2
+            line(this.a+820, this.b+315, this.c+785, this.d+320) // ниже слева22
+            line(this.a+875, this.b+335, this.c+800, this.d+360) // ниже ниже слева
+            line(this.a+875, this.b+335, this.c+940, this.d+280) // справа ниже
+            line(this.a+940, this.b+280, this.c+960, this.d+250) // справа ниже2
+            line(this.a+875, this.b+335, this.c+930, this.d+340) // ниже ниже справа
+            line(this.a+930, this.b+340, this.c+955, this.d+330) // ниже ниже справа2
+        },
+    });
+
+    trees.push({
+        a: 0 + 900,
+        b: 0,
+        c: 0 + 900,
+        d: 0,
+        x1: 860 + 900,
+        y1: 462,
+        x2: 890 + 900,
+        y2: 462,
+        x3: 875 + 900,
+        y3: 320,
+        color: color(48, 47, 47),
+        drawTree: function () {
+            noStroke();
+            fill(this.color);
+            triangle(this.x1, this.y1, this.x2, this.y2, this.x3, this.y3);
+            strokeWeight(5); //ветки
+            stroke(48, 47, 47);
+            line(this.a+875, this.b+330, this.c+825, this.d+280) // main left
+            line(this.a+875, this.b+335, this.c+895, this.d+235) // main right
+            line(this.a+825, this.b+280, this.c+800, this.d+220) // l2
+            line(this.a+800, this.b+220, this.c+780, this.d+200) // l3
+            line(this.a+895, this.b+235, this.c+915, this.d+200) // r2
+            line(this.a+875, this.b+330, this.c+850, this.d+190) // middle1
+            line(this.a+850, this.b+190, this.c+860, this.d+130) // m2
+            line(this.a+875, this.b+335, this.c+840, this.d+250) // ml
+            line(this.a+875, this.b+335, this.c+820, this.d+315) // ниже слева1
+            line(this.a+820, this.b+315, this.c+770, this.d+290) // ниже слева2
+            line(this.a+820, this.b+315, this.c+785, this.d+320) // ниже слева22
+            line(this.a+875, this.b+335, this.c+800, this.d+360) // ниже ниже слева
+            line(this.a+875, this.b+335, this.c+940, this.d+280) // справа ниже
+            line(this.a+940, this.b+280, this.c+960, this.d+250) // справа ниже2
+            line(this.a+875, this.b+335, this.c+930, this.d+340) // ниже ниже справа
+            line(this.a+930, this.b+340, this.c+955, this.d+330) // ниже ниже справа2
+        },
+    });
+
+    trees.push({
+        a: 0 + 1600,
+        b: 0,
+        c: 0 + 1600,
+        d: 0,
+        x1: 860 + 1600,
+        y1: 462,
+        x2: 890 + 1600,
+        y2: 462,
+        x3: 875 + 1600,
+        y3: 320,
+        color: color(48, 47, 47),
+        drawTree: function () {
+            noStroke();
+            fill(this.color);
+            triangle(this.x1, this.y1, this.x2, this.y2, this.x3, this.y3);
+            strokeWeight(5); //ветки
+            stroke(48, 47, 47);
+            line(this.a+875, this.b+330, this.c+825, this.d+280) // main left
+            line(this.a+875, this.b+335, this.c+895, this.d+235) // main right
+            line(this.a+825, this.b+280, this.c+800, this.d+220) // l2
+            line(this.a+800, this.b+220, this.c+780, this.d+200) // l3
+            line(this.a+895, this.b+235, this.c+915, this.d+200) // r2
+            line(this.a+875, this.b+330, this.c+850, this.d+190) // middle1
+            line(this.a+850, this.b+190, this.c+860, this.d+130) // m2
+            line(this.a+875, this.b+335, this.c+840, this.d+250) // ml
+            line(this.a+875, this.b+335, this.c+820, this.d+315) // ниже слева1
+            line(this.a+820, this.b+315, this.c+770, this.d+290) // ниже слева2
+            line(this.a+820, this.b+315, this.c+785, this.d+320) // ниже слева22
+            line(this.a+875, this.b+335, this.c+800, this.d+360) // ниже ниже слева
+            line(this.a+875, this.b+335, this.c+940, this.d+280) // справа ниже
+            line(this.a+940, this.b+280, this.c+960, this.d+250) // справа ниже2
+            line(this.a+875, this.b+335, this.c+930, this.d+340) // ниже ниже справа
+            line(this.a+930, this.b+340, this.c+955, this.d+330) // ниже ниже справа2
+        },
+    });
+
+    trees.push({ // behind the pond
+        a: 0 - 920,
+        b: 0,
+        c: 0 - 920,
+        d: 0,
+        x1: 860 - 920,
+        y1: 462,
+        x2: 890 - 920,
+        y2: 462,
+        x3: 875 - 920,
+        y3: 320,
+        color: color(48, 47, 47),
+        drawTree: function () {
+            noStroke();
+            fill(this.color);
+            triangle(this.x1, this.y1, this.x2, this.y2, this.x3, this.y3);
+            strokeWeight(5); //ветки
+            stroke(48, 47, 47);
+            line(this.a+875, this.b+330, this.c+825, this.d+280) // main left
+            line(this.a+875, this.b+335, this.c+895, this.d+235) // main right
+            line(this.a+825, this.b+280, this.c+800, this.d+220) // l2
+            line(this.a+800, this.b+220, this.c+780, this.d+200) // l3
+            line(this.a+895, this.b+235, this.c+915, this.d+200) // r2
+            line(this.a+875, this.b+330, this.c+850, this.d+190) // middle1
+            line(this.a+850, this.b+190, this.c+860, this.d+130) // m2
+            line(this.a+875, this.b+335, this.c+840, this.d+250) // ml
+            line(this.a+875, this.b+335, this.c+820, this.d+315) // ниже слева1
+            line(this.a+820, this.b+315, this.c+770, this.d+290) // ниже слева2
+            line(this.a+820, this.b+315, this.c+785, this.d+320) // ниже слева22
+            line(this.a+875, this.b+335, this.c+800, this.d+360) // ниже ниже слева
+            line(this.a+875, this.b+335, this.c+940, this.d+280) // справа ниже
+            line(this.a+940, this.b+280, this.c+960, this.d+250) // справа ниже2
+            line(this.a+875, this.b+335, this.c+930, this.d+340) // ниже ниже справа
+            line(this.a+930, this.b+340, this.c+955, this.d+330) // ниже ниже справа2
+        },
+    });
+
     floor = {
         height: 140,
         color: color(175, 192, 196),
@@ -316,8 +483,8 @@ function setup()
         },
     } 
     
-    pond =
-    {
+    pond.push({ 
+    
         x1: 0,
         y1: 0,
         x2: 0,
@@ -339,10 +506,9 @@ function setup()
             fill(this.shade_color);
             quad(this.x1, this.y1+432, this.x2+270, this.y2+432, this.x3+380, this.y3+576, this.x4, this.y4+576);
         },
-    }
+    });
     
-    highlights =
-    {
+    highlights.push({
         a: 0,
         b: 0,
         c: 0,
@@ -358,22 +524,7 @@ function setup()
             line(this.a+150, this.b+515, this.c+270, this.d+515);
             line(this.a+15, this.b+545, this.c+50, this.d+545);
         },
-    }
-
-    underwater =
-    {
-        a: 0,
-        b: 0,
-        c: 0,
-        d: 0,
-        color: color(21, 36, 51, 100),
-        drawUnderwater: function()
-        {
-            noStroke();
-            fill(this.color);
-            rect(this.a, this.b+465, this.c+270, this.d+144);
-        },
-    }
+    });
     
     switcher = // '?'
     {
@@ -395,7 +546,7 @@ function setup()
         
     }
     
-    enemy = {
+    enemy.push({
         x: 430,
         y: 410,
         width: 60,
@@ -446,7 +597,7 @@ function setup()
                 this.fallSpeed = 4;
             }
         },
-    };
+    });
 
     for(let i = 0; i < countCanyons; i++)
     {
@@ -469,6 +620,7 @@ function setup()
         background_music.setVolume(0.3);
         death_se.setVolume(0.3);  
         kill_se.setVolume(0.3);
+        onGrounded = floor;
 };
 
 function drawPlatforms() {
@@ -576,6 +728,109 @@ function restartGame() {
     gamePaused = false;
 }
 
+function movingCamera(direction)
+{
+    for(let i = 0; i < canyons.length; i++)
+    {
+        if (!direction)
+            canyons[i].x += player.speedRun;
+        else
+            canyons[i].x -= player.speedRun;
+    }
+
+    for(let i = 0; i < platforms.length; i++)
+    {
+        if (!direction)
+            platforms[i].x += player.speedRun;
+        else
+            platforms[i].x -= player.speedRun;
+    }
+
+    for(let i = 0; i < trees.length; i++)
+    {
+        if (!direction)
+            trees[i].x1 += player.speedRun;
+        else
+            trees[i].x1 -= player.speedRun;
+
+        if (!direction)
+            trees[i].x2 += player.speedRun;
+        else
+            trees[i].x2 -= player.speedRun;
+
+        if (!direction)
+            trees[i].x3 += player.speedRun;
+        else
+            trees[i].x3 -= player.speedRun;
+
+        if (!direction)
+            trees[i].a += player.speedRun;
+        else
+            trees[i].a -= player.speedRun;
+
+        if (!direction)
+            trees[i].c += player.speedRun;
+        else
+            trees[i].c -= player.speedRun;
+    }
+
+    for(let i = 0; i < pond.length; i++)
+    {
+        if (!direction)
+            pond[i].x1 += player.speedRun;
+        else
+            pond[i].x1 -= player.speedRun;
+        if (!direction)
+            pond[i].x2 += player.speedRun;
+        else
+            pond[i].x2 -= player.speedRun;
+        if (!direction)
+            pond[i].x3 += player.speedRun;
+        else
+            pond[i].x3 -= player.speedRun;
+        if (!direction)
+            pond[i].x4 += player.speedRun;
+        else
+            pond[i].x4 -= player.speedRun;
+    }
+
+    for(let i = 0; i < highlights.length; i++)
+    {
+    if (!direction)
+        highlights[i].a += player.speedRun;
+    else
+        highlights[i].a -= player.speedRun;
+
+    if (!direction)
+        highlights[i].c += player.speedRun;
+    else
+        highlights[i].c -= player.speedRun;
+    }
+
+    for(let i = 0; i < enemy.length; i++)
+    {
+        if (!direction)
+            enemy[i].x += player.speedRun;
+        else
+            enemy[i].x -= player.speedRun;
+
+        if (!direction)
+            enemy[i].borderLeft += player.speedRun;
+        else
+            enemy[i].borderLeft -= player.speedRun;
+
+        if (!direction)
+            enemy[i].borderRight += player.speedRun;
+        else
+            enemy[i].borderRight -= player.speedRun;
+    }
+
+    if (!direction)
+        player.x += player.speedRun;
+    else
+        player.x -= player.speedRun;
+}
+
 function draw()
 {
     if (gamePaused) {
@@ -587,28 +842,46 @@ function draw()
     }
 
     background(18, 36, 35);
+    floor.drawFloor();
     sky.drawSky();
     moon.drawMoon();
     stars.drawStars();
-    tree.drawTree();
-    floor.drawFloor();
-    pond.drawPond();
+    for (let i = 0; i < pond.length; i++) {
+        pond[i].drawPond();
+    };
     for(let i = 0; i < canyons.length; i++)
         canyons[i].drawCanyon();
-    highlights.drawHighlights();
+    for (let i = 0; i < highlights.length; i++) {
+        highlights[i].drawHighlights();
+    };
     drawPlatforms();
     
-    enemy.draw();
-    enemy.movement();
-    enemy.respawn(); 
+    for (let i = 0; i < enemy.length; i++) {
+        enemy[i].draw();
+    };
+    for (let i = 0; i < enemy.length; i++) {
+        enemy[i].movement();
+    };
+    for (let i = 0; i < enemy.length; i++) {
+        enemy[i].respawn();
+    }; 
     
+    if (player.x > width - 2 * offsetMovingCamera)
+        movingCamera(true);
+    else if (player.x < offsetMovingCamera)
+        movingCamera(false);
+
     player.drawPlayer();
     player.checkEnemy();
     player.checkCanyon();
     player.checkOutside();
     player.gravity(floor);
     player.movement();
-    underwater.drawUnderwater();
+    // Draw all trees
+    for (let i = 0; i < trees.length; i++) {
+        trees[i].drawTree();
+    };
+    noStroke();
     fill(switcher.color1);
     textSize(15);
     text(": " + score, 10, 30);
