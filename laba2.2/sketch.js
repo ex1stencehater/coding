@@ -4,7 +4,7 @@ let sky;
 let moon;
 let stars;
 let countTrees = 4;
-let trees = []; // Array to hold multiple trees
+let trees = [];
 let floor;
 let pond = [];
 let highlights = [];
@@ -17,11 +17,14 @@ let kill_se;
 
 let countCanyons = 1;
 let canyons = [];
-let countPlatforms = 1;
-let platforms = [{ x: 540, y: 330, width: 100, height: 10 }];
+let countPlatforms = 2;
+let platforms = [{ x: 600, y: 330, width: 100, height: 10, x1: 750, y1: 310, x2: 930, y2: 320
+}];
 let onGrounded;
 let basefloor = 200;
 let offsetMovingCamera = 200;
+let countClouds = 1;
+let clouds = []; // UFO. NOT cloud.
 
 let soundSlider;
 let musicSlider;
@@ -70,11 +73,13 @@ function setup()
             let onPlatform = false;
 
             // check if the player is on any platform
-            for (let i = 0; i < platforms.length; i++) {
+
+            for (let i = 0; i < platforms.length; i++) { // PLATFORM 0
                 let platform = platforms[i];
                 if (
-                    this.x + this.width / 2 > platform.x &&
-                    this.x - this.width / 2 < platform.x + platform.width &&
+                    this.x + this.width / 2 - 20> platform.x && //470+40>600
+                    this.x - this.width / 2 + 20< platform.x + platform.width &&
+
                     this.y + this.height / 2 >= platform.y &&
                     this.y + this.height / 2 <= platform.y + platform.height
                 ) {
@@ -83,8 +88,34 @@ function setup()
                     this.y = platform.y - this.height / 2; // align player on top of the platform
                     break;
                 }
+
+                if (
+                    this.x + this.width / 2 - 20> platform.x1 &&
+                    this.x - this.width / 2 + 20< platform.x1 + platform.width &&
+
+                    this.y + this.height / 2 >= platform.y1 &&
+                    this.y + this.height / 2 <= platform.y1 + platform.height
+                ) {
+                    onPlatform = true;
+                    this.grounded = true;
+                    this.y = platform.y1 - this.height / 2;
+                    break;
+                }
+
+                if (
+                    this.x + this.width / 2 - 20> platform.x2 &&
+                    this.x - this.width / 2 + 20< platform.x2 + platform.width &&
+
+                    this.y + this.height / 2 >= platform.y2 &&
+                    this.y + this.height / 2 <= platform.y2 + platform.height
+                ) {
+                    onPlatform = true;
+                    this.grounded = true;
+                    this.y = platform.y2 - this.height / 2;
+                    break;
+                }
             }
-        
+
             // check for ground if not on a platform
             if (!onPlatform) {
                 if (this.speedGravity > -5) this.speedGravity--;
@@ -182,13 +213,11 @@ function setup()
                     }
                 }
         
-                // Handle enemy death animation
                 if (currentEnemy.dead) {
                     currentEnemy.deadAnimation();
                 }
             }
         
-            // Handle player death animation
             if (this.dead) {
                 this.deadAnimation();
             }
@@ -286,7 +315,7 @@ function setup()
         },
     }
         
-    trees.push({
+    trees.push({ //1st on the right
         a: 0,
         b: 0,
         c: 0,
@@ -398,7 +427,7 @@ function setup()
         },
     });
 
-    trees.push({
+    trees.push({ //last on the right
         a: 0 + 1600,
         b: 0,
         c: 0 + 1600,
@@ -551,8 +580,8 @@ function setup()
         y: 410,
         width: 60,
         height: 60,
-        borderLeft: 700,
-        borderRight: 900,
+        borderLeft: 600,
+        borderRight: 1050,
         speed: 2,
         fallSpeed: 4,
         direction: 1,
@@ -605,7 +634,7 @@ function setup()
         (
             {
                 //rect(0, 432, 270, 144)
-                x: 0 + i * 400,
+                x: 0 + i * 400, // любое число вместо нуля = проверка спавна нло только над озером
                 y: height-floor.height,
                 width: 270,
                 drawCanyon: function()
@@ -615,6 +644,21 @@ function setup()
                 }
             }
         );
+    };
+
+    for (let i = 0; i < countClouds; i++) {
+        clouds.push({
+            x: canyons[i].x + random(50,170), // спавнится только над озером
+            y: canyons[i].y - random(160,300),
+            width: 100,
+            height: 20,
+            color: color(180, 190, 180, 240),
+            drawClouds: function () {
+                fill(this.color);
+                ellipse(this.x, this.y, this.width, this.height);
+                ellipse(this.x, this.y, this.width / 2, this.height * 2);
+            }
+        });
     };
 
         background_music.setVolume(0.3);
@@ -628,6 +672,8 @@ function drawPlatforms() {
         noStroke();
         fill(100, 100, 100);
         rect(platforms[i].x, platforms[i].y, platforms[i].width, platforms[i].height);
+        rect(platforms[i].x1, platforms[i].y1, platforms[i].width, platforms[i].height);
+        rect(platforms[i].x2, platforms[i].y2, platforms[i].width, platforms[i].height);
     }
 }
 
@@ -641,6 +687,9 @@ function keyPressed()
 
     if (keyIsDown(50)) // '2'
         toggleSoundSlider();
+
+    if (keyIsDown(82)) // 'R'
+        restartGame();
 }
 
 function changeMuteMusic() 
@@ -670,7 +719,7 @@ function toggleMusicSlider() {
 function showMusicSlider()
 {
     musicSlider = createSlider(0, 1, 0.3, 0.1); 
-    musicSlider.position(10, 100);
+    musicSlider.position(10, 120);
     musicSlider.style('width', '80px');
     musicSlider.input(changeVolumeMusic);
 }
@@ -693,7 +742,7 @@ function toggleSoundSlider() {
 function showSoundSlider()
 {
     soundSlider = createSlider(0, 1, 0.3, 0.1);
-    soundSlider.position(10, 120);
+    soundSlider.position(10, 140);
     soundSlider.style('width', '80px');
     soundSlider.input(changeVolumeSound);
 }
@@ -720,9 +769,17 @@ function restartGame() {
     player.y = 210;
     player.dead = false;
     score = 0;
-    enemy.dead = false;
-    enemy.x = 430;
-    enemy.y = 410;
+    for (let i = 0; i < enemy.length; i++) {
+        enemy[i].dead = false;
+        enemy[i].x = random(enemy[i].borderLeft, enemy[i].borderRight);
+        enemy[i].y = 410;
+        enemy[i].fallSpeed = 4;
+    }
+
+    for (let i = 0; i < clouds.length; i++) {
+        clouds[i].x = canyons[i].x + random(50,170); 
+        clouds[i].y = canyons[i].y - random(160,300); 
+    }
 
     restartButton.remove();
     gamePaused = false;
@@ -744,6 +801,24 @@ function movingCamera(direction)
             platforms[i].x += player.speedRun;
         else
             platforms[i].x -= player.speedRun;
+
+        if (!direction)
+            platforms[i].x1 += player.speedRun;
+        else
+            platforms[i].x1 -= player.speedRun;
+
+        if (!direction)
+            platforms[i].x2 += player.speedRun;
+        else
+            platforms[i].x2 -= player.speedRun;
+    }
+
+    for(let i = 0; i < clouds.length; i++)
+        {
+            if (!direction)
+                clouds[i].x += player.speedRun;
+            else
+                clouds[i].x -= player.speedRun;
     }
 
     for(let i = 0; i < trees.length; i++)
@@ -855,6 +930,8 @@ function draw()
         highlights[i].drawHighlights();
     };
     drawPlatforms();
+    for(let i = 0; i < clouds.length; i++)
+        clouds[i].drawClouds();
     
     for (let i = 0; i < enemy.length; i++) {
         enemy[i].draw();
@@ -877,7 +954,6 @@ function draw()
     player.checkOutside();
     player.gravity(floor);
     player.movement();
-    // Draw all trees
     for (let i = 0; i < trees.length; i++) {
         trees[i].drawTree();
     };
@@ -885,7 +961,8 @@ function draw()
     fill(switcher.color1);
     textSize(15);
     text(": " + score, 10, 30);
-    text("'M' to play/stop music", 10, 50);
-    text("'1' to change music volume", 10, 70);
-    text("'2' to change sound volume", 10, 90);
+    text("'R' to restart game", 10, 50)
+    text("'M' to play/stop music", 10, 70);
+    text("'1' to change music volume", 10, 90);
+    text("'2' to change sound volume", 10, 110);
 }
