@@ -12,7 +12,7 @@ let score = 0;
 let enemy = [];
 let background_music;
 let death_se;
-let backPlay;
+let backPlay = true;
 let kill_se;
 
 let countCanyons = 1;
@@ -24,14 +24,17 @@ let onGrounded;
 let basefloor = 200;
 let offsetMovingCamera = 200;
 let countClouds = 1;
-let clouds = []; // UFO. NOT cloud.
+let clouds = []; // UFO.
 
 let soundSlider;
 let musicSlider;
 let musicSliderVisible = false;
 let soundSliderVisible = false;
 let restartButton;
+let playAgainButton;
 let gamePaused = false;
+let leftWall = [{ x: -200, y: 0, width: 10, height: 20 }];
+let rightWall = [{ x: 2300, y: 0, width: 10, height: 20 }];
 
 function preload() {
     soundFormats('mp3', 'wav', 'ogg');
@@ -71,6 +74,7 @@ function setup()
         },
         gravity: function (floor) {
             let onPlatform = false;
+            let onCloud = false;
 
             // check if the player is on any platform
 
@@ -114,10 +118,25 @@ function setup()
                     this.y = platform.y2 - this.height / 2;
                     break;
                 }
+
+                for (let i = 0; i < clouds.length; i++) {
+                    let cloud = clouds[i];
+                if (
+                    this.x + this.width / 2 - 20 > cloud.x - 50 &&
+                    this.x - this.width / 2 + 20 < cloud.x + cloud.width - 50 &&
+                    this.y + this.height / 2 >= cloud.y &&
+                    this.y + this.height / 2 <= cloud.y + cloud.height
+                ) {
+                    onCloud = true;
+                    this.grounded = true;
+                    this.y = cloud.y - this.height / 2; // align player on top of the cloud
+                    break;
+                }
+                }
             }
 
             // check for ground if not on a platform
-            if (!onPlatform) {
+            if (!onPlatform && !onCloud) {
                 if (this.speedGravity > -5) this.speedGravity--;
                 if (this.y + this.height / 2 < height - floor.height) {
                     this.y -= this.speedGravity;
@@ -140,7 +159,7 @@ function setup()
             
                 noStroke()
                 fill(205, 207, 89)
-                ellipse(this.x, this.y, this.width, this.height)
+                ellipse(this.x+5, this.y, this.width, this.height)
                 fill(240, 234, 228)
                 ellipse(this.x-18, this.y-10, this.width-65, this.height-50)
                 fill('black')
@@ -153,7 +172,7 @@ function setup()
             
                 noStroke()
                 fill(205, 207, 89)
-                ellipse(this.x, this.y, this.width, this.height)
+                ellipse(this.x-5, this.y, this.width, this.height)
                 fill(240, 234, 228)
                 ellipse(this.x+18, this.y-10, this.width-65, this.height-50)
                 fill('black')
@@ -171,6 +190,10 @@ function setup()
                 if (keyIsDown(65))
                     this.moveLeft();
             }
+            player.x = constrain(player.x,
+            leftWall[0].x + leftWall[0].width + player.width / 2,
+            rightWall[0].x - player.width / 2
+    );
         },
         deadAnimation: function()
         {
@@ -221,12 +244,6 @@ function setup()
             if (this.dead) {
                 this.deadAnimation();
             }
-        },
-        checkOutside: function() {
-            if (this.x < -10)
-                this.x = width - this.width + 10;
-            if (this.x > width + 10)
-                this.x = -10;
         },
         checkCanyon: function() {
             for(let i = 0; i < canyons.length; i++)
@@ -648,8 +665,8 @@ function setup()
 
     for (let i = 0; i < countClouds; i++) {
         clouds.push({
-            x: canyons[i].x + random(50,170), // спавнится только над озером
-            y: canyons[i].y - random(160,300),
+            x: canyons[i].x + random(80,200), // спавнится только над озером
+            y: canyons[i].y - random(60,100),
             width: 100,
             height: 20,
             color: color(180, 190, 180, 240),
@@ -674,6 +691,24 @@ function drawPlatforms() {
         rect(platforms[i].x, platforms[i].y, platforms[i].width, platforms[i].height);
         rect(platforms[i].x1, platforms[i].y1, platforms[i].width, platforms[i].height);
         rect(platforms[i].x2, platforms[i].y2, platforms[i].width, platforms[i].height);
+    }
+}
+
+function drawLeftWall()
+{
+    for (let i = 0; i < leftWall.length; i++) {
+        noStroke();
+        fill(255,0,0);
+        rect(leftWall[i].x, leftWall[i].y, leftWall[i].width, leftWall[i].height);
+    }
+}
+
+function drawRightWall()
+{
+    for (let i = 0; i < rightWall.length; i++) {
+        noStroke();
+        fill(255,0,0);
+        rect(rightWall[i].x, rightWall[i].y, rightWall[i].width, rightWall[i].height);
     }
 }
 
@@ -777,11 +812,43 @@ function restartGame() {
     }
 
     for (let i = 0; i < clouds.length; i++) {
-        clouds[i].x = canyons[i].x + random(50,170); 
-        clouds[i].y = canyons[i].y - random(160,300); 
+        clouds[i].x = canyons[i].x + random(80,200); 
+        clouds[i].y = canyons[i].y - random(60,100); 
     }
 
     restartButton.remove();
+    gamePaused = false;
+}
+
+function showPlayAgainButton() {
+    if (!playAgainButton) {
+        playAgainButton = createButton('play again');
+        playAgainButton.position(width / 2 - 60, height / 2);
+        playAgainButton.style('font-size', '20px');
+        playAgainButton.style('padding', '10px 20px');
+        playAgainButton.style('background-color', '#41d40b');
+        playAgainButton.style('color', '0');
+        playAgainButton.mousePressed(playAgain);
+    }
+}
+
+function playAgain() {
+    score = 0;
+    player.x = 470;
+    player.y = 210;
+    player.dead = false;
+    for (let i = 0; i < enemy.length; i++) {
+        enemy[i].dead = false;
+        enemy[i].x = random(enemy[i].borderLeft, enemy[i].borderRight);
+        enemy[i].y = 410;
+        enemy[i].fallSpeed = 4;
+    }
+    for (let i = 0; i < clouds.length; i++) {
+        clouds[i].x = canyons[i].x + random(80,200); 
+        clouds[i].y = canyons[i].y - random(60,100); 
+    }
+    playAgainButton.remove();
+    playAgainButton = null;
     gamePaused = false;
 }
 
@@ -900,6 +967,22 @@ function movingCamera(direction)
             enemy[i].borderRight -= player.speedRun;
     }
 
+    for(let i = 0; i < leftWall.length; i++)
+    {
+        if (!direction)
+            leftWall[i].x += player.speedRun;
+        else
+            leftWall[i].x -= player.speedRun;
+    }
+
+    for(let i = 0; i < rightWall.length; i++)
+    {
+        if (!direction)
+            rightWall[i].x += player.speedRun;
+        else
+            rightWall[i].x -= player.speedRun;
+    }
+
     if (!direction)
         player.x += player.speedRun;
     else
@@ -913,6 +996,13 @@ function draw()
         fill(255);
         textSize(20);
         text("you are dead", width / 2 - 60, height / 2 - 50);
+        return;
+    }
+    if (score >= 3) {
+        showPlayAgainButton();
+        fill(255);
+        textSize(22);
+        text("you won", width / 2 - 32, height / 2 - 50);
         return;
     }
 
@@ -930,6 +1020,8 @@ function draw()
         highlights[i].drawHighlights();
     };
     drawPlatforms();
+    drawLeftWall();
+    drawRightWall();
     for(let i = 0; i < clouds.length; i++)
         clouds[i].drawClouds();
     
@@ -951,7 +1043,6 @@ function draw()
     player.drawPlayer();
     player.checkEnemy();
     player.checkCanyon();
-    player.checkOutside();
     player.gravity(floor);
     player.movement();
     for (let i = 0; i < trees.length; i++) {
@@ -965,4 +1056,6 @@ function draw()
     text("'M' to play/stop music", 10, 70);
     text("'1' to change music volume", 10, 90);
     text("'2' to change sound volume", 10, 110);
+    fill(255, 255, 0, 150);
+    text("': 3' to win", 50, 30);
 }
